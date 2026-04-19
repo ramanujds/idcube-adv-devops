@@ -3,24 +3,18 @@ name: part-inventory-and-order-services
 services:
   part-inventory-service:
     build:
-      context: ./part-inventory-service-node
+      context: ./part-inventory-service-dotnet
       dockerfile: Dockerfile
-    image: ram1uj/part-inventory-service:node
+    image: ram1uj/part-inventory-service:dotnet
     container_name: part-inventory-service
     restart: unless-stopped
     ports:
       - "8081:8080"
     environment:
-      NODE_ENV: production
+      ASPNETCORE_ENVIRONMENT: Production
       PORT: 8080
     healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "fetch('http://127.0.0.1:8080/api/parts').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
-        ]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
