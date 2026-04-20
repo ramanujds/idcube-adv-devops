@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: part-inventory-service
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: part-inventory-service
@@ -28,26 +28,6 @@ spec:
               value: "Production"
             - name: PORT
               value: "8080"
-          startupProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            failureThreshold: 30
-            periodSeconds: 10
 
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 0
-            periodSeconds: 10
-            failureThreshold: 3
-
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            periodSeconds: 5
-            failureThreshold: 3
           ports:
             - containerPort: 8080

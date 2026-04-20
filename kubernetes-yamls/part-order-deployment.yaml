@@ -30,3 +30,14 @@ spec:
               value: "http://part-inventory-service"
           ports:
             - containerPort: 8080
+      initContainers:
+        - name: wait-for-inventory-service
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z -v -w30 part-inventory-service 80; do
+                echo "Waiting for part-inventory-service to be available..."
+                sleep 5
+              done
