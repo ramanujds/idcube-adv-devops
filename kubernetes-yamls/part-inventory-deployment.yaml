@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: part-inventory-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: part-inventory-service
+  template:
+    metadata:
+      labels:
+        app: part-inventory-service
+    spec:
+      containers:
+        - name: part-inventory-service
+          image: ram1uj/part-inventory-service:dotnet
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: "400m"
+              memory: "256Mi"
+            limits:
+              cpu: "600m"
+              memory: "512Mi"
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: PORT
+              value: "8080"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 30
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 5
+            failureThreshold: 3
+          ports:
+            - containerPort: 8080
