@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.partOrder.service.name }}
+  labels:
+    app: part-order-service
+
+spec:
+  selector:
+    app: part-order-service
+
+  type: {{ .Values.partOrder.service.type }}
+  ports:
+    - port: {{ .Values.partOrder.service.port }}
+      targetPort: {{ .Values.partOrder.service.targetPort }}
+      nodePort: {{ .Values.partOrder.service.nodePort }}
+
+
+
