@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: part-order-service
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: part-order-service
@@ -12,10 +12,29 @@ spec:
       labels:
         app: part-order-service
     spec:
+      tolerations:
+        - key: "type"
+          operator: "Equal"
+          value: "hdd"
+          effect: "NoSchedule"
+        - key: "type"
+          operator: "Equal"
+          value: "ssd"
+          effect: "NoSchedule"
+#      affinity:
+#        podAffinity:
+#          requiredDuringSchedulingIgnoredDuringExecution:
+#            - labelSelector:
+#                matchExpressions:
+#                  - key: app
+#                    operator: In
+#                    values:
+#                      - part-inventory-service
+#              topologyKey: kubernetes.io/hostname
       containers:
         - name: part-order-service
           image: ram1uj/part-order-service:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           resources:
             requests:
               cpu: "200m"
@@ -30,32 +49,41 @@ spec:
               value: "http://part-inventory-service"
           ports:
             - containerPort: 8080
-          readinessProbe:
-            httpGet:
-              path: /actuator/health/readiness
-              port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            failureThreshold: 3
+#          readinessProbe:
+#            httpGet:
+#              path: /actuator/health/readiness
+#              port: 8080
+#            initialDelaySeconds: 30
+#            periodSeconds: 10
+#            failureThreshold: 3
+#
+#          livenessProbe:
+#            httpGet:
+#              path: /actuator/health/liveness
+#              port: 8080
+#            initialDelaySeconds: 30
+#            periodSeconds: 10
+#            failureThreshold: 3
+#            timeoutSeconds: 5
+#
+#          startupProbe:
+#            httpGet:
+#              path: /actuator/health/liveness
+#              port: 8080
+#            initialDelaySeconds: 60
+#            periodSeconds: 10
+#            failureThreshold: 3
+#            timeoutSeconds: 5
 
-          livenessProbe:
-            httpGet:
-              path: /actuator/health/liveness
-              port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            failureThreshold: 3
-            timeoutSeconds: 5
 
-
-      initContainers:
-        - name: wait-for-inventory-service
-          image: busybox
-          command:
-            - sh
-            - -c
-            - |
-              until nc -z -v -w30 part-inventory-service 80; do
-                echo "Waiting for part-inventory-service to be available..."
-                sleep 5
-              done
+#      initContainers:
+#        - name: wait-for-inventory-service
+#          image: busybox
+#          command:
+#            - sh
+#            - -c
+#            - |
+#              until nc -z -v -w30 part-inventory-service 80; do
+#                echo "Waiting for part-inventory-service to be available..."
+#                sleep 5
+#              done
