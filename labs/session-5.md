@@ -1,4 +1,4 @@
-# SESSION 5 — Node Scheduling (Affinity, Anti-Affinity, Taints & Tolerations) 
+# SESSION 5 — Pod Scheduling (Affinity, Anti-Affinity, Taints & Tolerations) 
 
 ---
 

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: part-inventory-service
 spec:
-  replicas: 3
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -42,10 +42,10 @@ spec:
           resources:
             requests:
               cpu: "400m"
-              memory: "256Mi"
-            limits:
-              cpu: "600m"
               memory: "512Mi"
+            limits:
+              cpu: "800m"
+              memory: "1024Mi"
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "dev"
