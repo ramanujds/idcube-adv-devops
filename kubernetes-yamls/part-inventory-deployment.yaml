@@ -37,7 +37,7 @@ spec:
 #                topologyKey: kubernetes.io/hostname
       containers:
         - name: part-inventory-service
-          image: ram1uj/part-inventory-service:latest
+          image: ram1uj/part-inventory-service:dotnet
           imagePullPolicy: Always
           resources:
             requests:
