@@ -7,17 +7,22 @@ namespace PartInventoryService.DotNet.Controllers;
 public class InventoryController : Controller
 {
     private readonly IPartRepository _partRepository;
+    private readonly ILogger<InventoryController> _logger;
 
-    public InventoryController(IPartRepository partRepository)
+    public InventoryController(IPartRepository partRepository, ILogger<InventoryController> logger)
     {
         _partRepository = partRepository;
+        _logger = logger;
     }
 
     [HttpGet("")]
     [HttpGet("inventory")]
     public IActionResult Index()
     {
-        return View("Index", _partRepository.FindAll());
+        _logger.LogInformation("Loading inventory view");
+        var parts = _partRepository.FindAll();
+        _logger.LogInformation("Displaying {Count} parts in inventory view", parts.Count);
+        return View("Index", parts);
     }
 
     [HttpGet("inventory-update")]
@@ -35,6 +40,7 @@ public class InventoryController : Controller
     [HttpPost("parts")]
     public IActionResult Create([FromForm] PartInputModel input)
     {
+        _logger.LogInformation("Creating part via UI with SKU: {Sku}", input.Sku);
         _partRepository.Create(new Part
         {
             Id = Guid.NewGuid().ToString(),
@@ -43,6 +49,7 @@ public class InventoryController : Controller
             Price = input.Price,
             Stock = input.Stock
         });
+        _logger.LogInformation("Part created via UI with SKU: {Sku}", input.Sku);
 
         return View("InventoryUpdate", new InventoryUpdateViewModel
         {
@@ -56,9 +63,11 @@ public class InventoryController : Controller
     [HttpGet("parts/{id}/edit")]
     public IActionResult Edit(string id)
     {
+        _logger.LogInformation("Loading edit view for part ID: {Id}", id);
         var part = _partRepository.FindById(id);
         if (part is null)
         {
+            _logger.LogWarning("Edit view requested for non-existent part ID: {Id}", id);
             return View("InventoryUpdate", new InventoryUpdateViewModel
             {
                 Type = "error",
@@ -74,7 +83,9 @@ public class InventoryController : Controller
     [HttpPost("parts/{id}")]
     public IActionResult Update(string id, [FromForm] PartInputModel input)
     {
+        _logger.LogInformation("Updating part via UI with ID: {Id}", id);
         _partRepository.Update(id, input);
+        _logger.LogInformation("Part updated via UI with ID: {Id}", id);
 
         return View("InventoryUpdate", new InventoryUpdateViewModel
         {
@@ -88,7 +99,9 @@ public class InventoryController : Controller
     [HttpPost("parts/{id}/delete")]
     public IActionResult Delete(string id)
     {
+        _logger.LogInformation("Deleting part via UI with ID: {Id}", id);
         _partRepository.DeleteById(id);
+        _logger.LogInformation("Part deleted via UI with ID: {Id}", id);
 
         return View("InventoryUpdate", new InventoryUpdateViewModel
         {

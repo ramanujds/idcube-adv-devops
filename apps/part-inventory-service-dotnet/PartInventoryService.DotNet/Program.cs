@@ -2,8 +2,23 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using PartInventoryService.DotNet.Data;
 using PartInventoryService.DotNet.HealthChecks;
 using PartInventoryService.DotNet.Repositories;
+using Serilog;
+using Serilog.Events;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext} - {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File(
+        path: "/app/logs/app.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext} - {Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<InventoryDatabase>();

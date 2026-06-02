@@ -1,3 +1,4 @@
 *.iml
 .idea
 /apps/part-inventory-service-node/node_modules/
+/apps/part-inventory-service-dotnet/PartInventoryService.DotNet/bin/

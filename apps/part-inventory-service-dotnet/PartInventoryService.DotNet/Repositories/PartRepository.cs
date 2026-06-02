@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
 using PartInventoryService.DotNet.Data;
 using PartInventoryService.DotNet.Models;
 
@@ -8,15 +9,18 @@ namespace PartInventoryService.DotNet.Repositories;
 public class PartRepository : IPartRepository
 {
 	private readonly SqliteConnection _connection;
+	private readonly ILogger<PartRepository> _logger;
 	private readonly Lock _sync = new();
 
-	public PartRepository(InventoryDatabase database)
+	public PartRepository(InventoryDatabase database, ILogger<PartRepository> logger)
 	{
 		_connection = database.Connection;
+		_logger = logger;
 	}
 
 	public Part Create(Part part)
 	{
+		_logger.LogDebug("Inserting part into database: ID={Id}, SKU={Sku}", part.Id, part.Sku);
 		lock (_sync)
 		{
 			using var command = _connection.CreateCommand();
@@ -34,6 +38,7 @@ public class PartRepository : IPartRepository
 
 	public IReadOnlyList<Part> FindAll()
 	{
+		_logger.LogDebug("Querying all parts from database");
 		lock (_sync)
 		{
 			using var command = _connection.CreateCommand();
@@ -46,12 +51,14 @@ public class PartRepository : IPartRepository
 				parts.Add(MapPart(reader));
 			}
 
+			_logger.LogDebug("Found {Count} parts in database", parts.Count);
 			return parts;
 		}
 	}
 
 	public Part? FindById(string id)
 	{
+		_logger.LogDebug("Querying part by ID: {Id}", id);
 		lock (_sync)
 		{
 			return FindByIdCore(id);
@@ -60,6 +67,7 @@ public class PartRepository : IPartRepository
 
 	public IReadOnlyList<Part> FindBySku(string sku)
 	{
+		_logger.LogDebug("Querying parts by SKU: {Sku}", sku);
 		lock (_sync)
 		{
 			using var command = _connection.CreateCommand();
@@ -73,12 +81,14 @@ public class PartRepository : IPartRepository
 				parts.Add(MapPart(reader));
 			}
 
+			_logger.LogDebug("Found {Count} parts for SKU: {Sku}", parts.Count, sku);
 			return parts;
 		}
 	}
 
 	public Part? Update(string id, PartInputModel partDetails)
 	{
+		_logger.LogDebug("Updating part in database: ID={Id}", id);
 		lock (_sync)
 		{
 			using var command = _connection.CreateCommand();
@@ -96,6 +106,7 @@ public class PartRepository : IPartRepository
 
 	public bool DeleteById(string id)
 	{
+		_logger.LogDebug("Deleting part from database: ID={Id}", id);
 		lock (_sync)
 		{
 			using var command = _connection.CreateCommand();
@@ -118,6 +129,7 @@ public class PartRepository : IPartRepository
 
 	public Part? DecrementStock(string id, int quantity)
 	{
+		_logger.LogDebug("Decrementing stock for part ID={Id} by {Quantity}", id, quantity);
 		lock (_sync)
 		{
 			using var command = _connection.CreateCommand();
