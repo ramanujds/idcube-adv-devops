@@ -13,12 +13,12 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   tls:
-    - hosts:
-        - api.idcube.com
-      secretName: idcube-letsencrypt-tls   # cert-manager creates this secret automatically
+#    - hosts:
+#        - api.idcube.com
+    - secretName: idcube-letsencrypt-tls   # cert-manager creates this secret automatically
   rules:
-    - host: api.idcube.com
-      http:
+#    - host: api.idcube.com
+     - http:
         paths:
           - path: /inventory
             pathType: Prefix

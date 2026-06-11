@@ -21,7 +21,7 @@ spec:
 
       containers:
         - name: part-inventory-service
-          image: partserviceacr.azurecr.io/part-inventory-servive:v1.2
+          image: ram1uj/part-inventory-service:latest
           imagePullPolicy: Always
           resources:
             requests:

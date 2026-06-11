@@ -255,15 +255,44 @@ AKS manages the Istio control plane. You create `Gateway` and `HTTPRoute` object
 
 ---
 
+
+### Install Gateway API CRDs
+Gateway API is not built-in. Install official CRDs:
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/latest/download/standard-install.yaml
+Verify:
+
+kubectl get crds | grep gateway
+
+```
+
+```text
+
+You should see:
+
+gateways.gateway.networking.k8s.io
+httproutes.gateway.networking.k8s.io
+gatewayclasses.gateway.networking.k8s.io
+Good. API is ready.
+
+```
+
+
+
 ### Step 1: Enable the Add-on
 
 For the existing `idcube-cluster`:
 
 ```bash
-az aks update \
+# 1. Install or update the preview extension
+az extension add --name aks-preview
+az extension update --name aks-preview
+
+# 2. Run the explicit sub-command to enable the Istio Gateway API
+az aks approuting gateway istio enable \
   --resource-group idcube-aks \
-  --name idcube-cluster \
-  --enable-app-routing-istio
+  --name idcube-cluster
+
 ```
 
 > **Note:** The Istio service mesh add-on and the app routing Gateway API add-on cannot be enabled at the same time. If you have the service mesh add-on, disable it first.
