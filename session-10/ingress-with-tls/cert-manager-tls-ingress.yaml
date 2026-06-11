@@ -1,0 +1,50 @@
+# Ingress that uses cert-manager to automatically obtain and renew a Let's Encrypt certificate.
+# Prerequisites:
+#   1. cert-manager installed in the cluster
+#   2. ClusterIssuer "letsencrypt-prod" created (cert-manager-issuer.yaml)
+#   3. DNS A record pointing api.idcube.com to the NGINX LoadBalancer IP
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: part-order-ingress-certmanager
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+    - hosts:
+        - api.idcube.com
+      secretName: idcube-letsencrypt-tls   # cert-manager creates this secret automatically
+  rules:
+    - host: api.idcube.com
+      http:
+        paths:
+          - path: /inventory
+            pathType: Prefix
+            backend:
+              service:
+                name: part-inventory-service
+                port:
+                  number: 80
+          - path: /parts
+            pathType: Prefix
+            backend:
+              service:
+                name: part-inventory-service
+                port:
+                  number: 80
+          - path: /orders
+            pathType: Prefix
+            backend:
+              service:
+                name: part-order-service
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: part-order-service
+                port:
+                  number: 80

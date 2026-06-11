@@ -1,0 +1,23 @@
+# Gateway resource for AKS App Routing add-on (Istio-based Gateway API)
+# Prerequisites:
+#   az aks update --resource-group idcube-aks --name idcube-cluster --enable-app-routing-istio
+#
+# After apply, AKS automatically provisions:
+#   - Istio proxy Deployment (2 replicas)
+#   - LoadBalancer Service (gets a public Azure IP)
+#   - HPA (min 2, max 5, CPU 80%)
+#   - PodDisruptionBudget (min 1 available)
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: idcube-gateway
+  namespace: default
+spec:
+  gatewayClassName: approuting-istio
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same
