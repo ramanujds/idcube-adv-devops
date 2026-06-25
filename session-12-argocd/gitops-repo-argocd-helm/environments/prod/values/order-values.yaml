@@ -1,0 +1,41 @@
+# Default values for inventory-order.
+
+nameOverride: ""
+fullnameOverride: ""
+
+commonLabels: { }
+
+imagePullSecrets: [ ]
+
+
+partOrder:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ram1uj/part-order-service
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: NodePort
+    # Azure YAML exposes port 80 -> targetPort 8080
+    port: 80
+    targetPort: 8080
+    nodePort: 30082
+    name: part-order-service
+  env:
+    springProfilesActive: dev
+    mysqlHost: mysql
+    mysqlPort: "3306"
+    mysqlDatabase: part_inventory_db
+    mysqlUser: root
+    mysqlPassword: password
+    inventoryServiceUrl: http://part-inventory-service
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+

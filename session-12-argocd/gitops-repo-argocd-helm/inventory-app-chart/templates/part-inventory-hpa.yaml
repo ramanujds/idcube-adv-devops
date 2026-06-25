@@ -1,0 +1,43 @@
+{{- if and .Values.partInventory.enabled .Values.partInventory.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: part-inventory-hpa
+  labels:
+    app: part-inventory-service
+    {{- include "inventory-order.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: part-inventory-service
+  minReplicas: {{ .Values.partInventory.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.partInventory.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.partInventory.autoscaling.cpu.enabled }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.partInventory.autoscaling.cpu.averageUtilization }}
+    {{- end }}
+    {{- if .Values.partInventory.autoscaling.memory.enabled }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.partInventory.autoscaling.memory.averageUtilization }}
+    {{- end }}
+    {{- if .Values.partInventory.autoscaling.customRequestsPerSecond.enabled }}
+    - type: Resource
+      resource:
+        # NOTE: This requires a custom metrics adapter to be installed in the cluster.
+        name: requests_per_second
+        target:
+          type: AverageValue
+          averageValue: {{ .Values.partInventory.autoscaling.customRequestsPerSecond.averageValue | quote }}
+    {{- end }}
+{{- end }}
+

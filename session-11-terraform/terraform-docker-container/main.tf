@@ -7,6 +7,8 @@ terraform {
   }
 }
 
+
+
 provider "docker" {}
 
 resource "docker_image" "caddy" {
@@ -22,4 +24,6 @@ resource "docker_container" "caddy" {
     external = 8080
   }
 }
+
+
 

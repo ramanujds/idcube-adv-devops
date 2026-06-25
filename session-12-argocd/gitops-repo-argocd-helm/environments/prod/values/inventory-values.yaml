@@ -1,0 +1,74 @@
+# Default values for inventory-order.
+
+nameOverride: ""
+fullnameOverride: ""
+
+commonLabels: { }
+
+imagePullSecrets: [ ]
+
+
+partInventory:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ram1uj/easy-recipes
+    tag: "latest"
+    pullPolicy: Always
+  service:
+    type: NodePort
+    # Azure YAML exposes port 80 -> targetPort 8080
+    port: 80
+    targetPort: 8080
+    nodePort: 30081
+    name: part-inventory-service
+  env:
+    springProfilesActive: dev
+    mysqlHost: mysql
+    mysqlPort: "3306"
+    mysqlDatabase: part_inventory_db
+    mysqlUser: root
+    mysqlPassword: password
+  startupProbe:
+    enabled: true
+    httpGet:
+      path: /actuator/health/liveness
+      port: 8080
+    failureThreshold: 30
+    periodSeconds: 10
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /actuator/health/liveness
+      port: 8080
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    failureThreshold: 3
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /actuator/health/readiness
+      port: 8080
+    periodSeconds: 5
+    failureThreshold: 3
+  resources:
+    requests:
+      cpu: "400m"
+      memory: "256Mi"
+    limits:
+      cpu: "600m"
+      memory: "512Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    cpu:
+      enabled: true
+      averageUtilization: 70
+    memory:
+      enabled: true
+      averageUtilization: 80
+    # requires custom metrics adapter; off by default
+    customRequestsPerSecond:
+      enabled: false
+      averageValue: "100"

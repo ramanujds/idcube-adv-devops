@@ -1,0 +1,73 @@
+{{- if .Values.partInventory.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: part-inventory-service
+  labels:
+    app: part-inventory-service
+    {{- include "inventory-order.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.partInventory.replicaCount }}
+  selector:
+    matchLabels:
+      app: part-inventory-service
+      {{- include "inventory-order.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: part-inventory-service
+        {{- include "inventory-order.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: part-inventory-service
+          image: "{{ .Values.partInventory.image.repository }}{{- if .Values.partInventory.image.tag }}:{{ .Values.partInventory.image.tag }}{{- end }}"
+          imagePullPolicy: {{ .Values.partInventory.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.partInventory.resources | nindent 12 }}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.partInventory.env.springProfilesActive | quote }}
+            - name: MYSQL_HOST
+              value: {{ .Values.partInventory.env.mysqlHost | quote }}
+            - name: MYSQL_PORT
+              value: {{ .Values.partInventory.env.mysqlPort | quote }}
+            - name: MYSQL_DATABASE
+              value: {{ .Values.partInventory.env.mysqlDatabase | quote }}
+            - name: MYSQL_USER
+              value: {{ .Values.partInventory.env.mysqlUser | quote }}
+            - name: MYSQL_PASSWORD
+              value: {{ .Values.partInventory.env.mysqlPassword | quote }}
+          {{- if .Values.partInventory.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.partInventory.startupProbe.httpGet.path | quote }}
+              port: {{ .Values.partInventory.startupProbe.httpGet.port }}
+            failureThreshold: {{ .Values.partInventory.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.partInventory.startupProbe.periodSeconds }}
+          {{- end }}
+          {{- if .Values.partInventory.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.partInventory.livenessProbe.httpGet.path | quote }}
+              port: {{ .Values.partInventory.livenessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.partInventory.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.partInventory.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.partInventory.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.partInventory.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.partInventory.readinessProbe.httpGet.path | quote }}
+              port: {{ .Values.partInventory.readinessProbe.httpGet.port }}
+            periodSeconds: {{ .Values.partInventory.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.partInventory.readinessProbe.failureThreshold }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.partInventory.service.targetPort }}
+              name: http
+---
+{{- end }}

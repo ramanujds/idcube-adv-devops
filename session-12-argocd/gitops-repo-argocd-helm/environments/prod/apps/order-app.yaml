@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: order-service-prod
+  namespace: argocd
+
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  sources:
+    - path: order-app-chart
+      repoURL: https://github.com/ramanujds/gitops-repo-forvia
+      targetRevision: HEAD
+      helm:
+        releaseName: order-service
+        valueFiles:
+          - $values/environments/prod/values/order-values.yaml
+    - repoURL: https://github.com/ramanujds/gitops-repo-forvia
+      targetRevision: HEAD
+      ref: values
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
